@@ -13,7 +13,7 @@ const {
 const TOKEN = process.env.DISCORD_TOKEN;
 
 // Your Discord ID
-const OWNER_ID = "991975250004811776";
+const OWNER_ID = "855383662068891668";
 
 // Account to ping when stock is available
 const ALERT_USER_ID = "991975250004811776";
