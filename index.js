@@ -6,6 +6,7 @@ const {
     Partials
 } = require("discord.js");
 
+
 // ============================================================
 // CONFIG
 // ============================================================
@@ -15,7 +16,7 @@ const TOKEN = process.env.DISCORD_TOKEN;
 // Your Discord user ID
 const OWNER_ID = "991975250004811776";
 
-// The account that automatically sends !stok
+// Account that automatically sends !stok
 const STOCK_ACCOUNT_ID = "991975250004811776";
 
 // User to ping when stock is available
@@ -24,7 +25,7 @@ const ALERT_USER_ID = "991975250004811776";
 // Kole V4 bot ID
 const KOLE_BOT_ID = "1154503721963769876";
 
-// EXACT channel where the automated !stok is sent
+// Channel where the automated !stok is sent
 const TRACKING_CHANNEL_ID = "1372075790799470673";
 
 // Maximum time to wait for Kole V4
@@ -64,7 +65,7 @@ let lastCheck = null;
 
 let lastAlert = null;
 
-// Prevent repeated alerts while stock stays above 0
+// Prevent repeated pings while stock stays above 0
 let stockAlerted = false;
 
 
@@ -79,17 +80,30 @@ client.once("ready", async () => {
     console.log("       KOLE V4 STOCK TRACKER");
     console.log("======================================");
 
-    console.log(`Logged in as: ${client.user.tag}`);
-    console.log(`Bot ID: ${client.user.id}`);
+    console.log(
+        `Logged in as: ${client.user.tag}`
+    );
 
-    console.log(`Watching account: ${STOCK_ACCOUNT_ID}`);
-    console.log(`Alert user: ${ALERT_USER_ID}`);
+    console.log(
+        `Bot ID: ${client.user.id}`
+    );
 
-    console.log(`Kole V4 ID: ${KOLE_BOT_ID}`);
+    console.log(
+        `Watching account: ${STOCK_ACCOUNT_ID}`
+    );
+
+    console.log(
+        `Alert user: ${ALERT_USER_ID}`
+    );
+
+    console.log(
+        `Kole V4 ID: ${KOLE_BOT_ID}`
+    );
 
     console.log(
         `Tracking channel: ${TRACKING_CHANNEL_ID}`
     );
+
 
     try {
 
@@ -97,6 +111,7 @@ client.once("ready", async () => {
             await client.channels.fetch(
                 TRACKING_CHANNEL_ID
             );
+
 
         console.log(
             "Channel loaded successfully."
@@ -140,7 +155,7 @@ client.on(
         try {
 
             // ==================================================
-            // AUTOMATED !STOK DETECTION
+            // DETECT AUTOMATED !STOK
             // ==================================================
 
             if (
@@ -167,23 +182,29 @@ client.on(
                     "Waiting for Kole V4 response..."
                 );
 
-                await handleStockCommand(message);
+
+                await handleStockCommand(
+                    message
+                );
+
 
                 return;
             }
 
 
             // ==================================================
-            // IGNORE ALL BOT MESSAGES FOR COMMANDS
+            // IGNORE BOT MESSAGES
             // ==================================================
 
-            if (message.author.bot) {
+            if (
+                message.author.bot
+            ) {
                 return;
             }
 
 
             // ==================================================
-            // ONLY OWNER CAN USE TRACKER COMMANDS
+            // OWNER COMMANDS
             // ==================================================
 
             if (
@@ -244,9 +265,11 @@ client.on(
                     `🔔 Alert: <@${ALERT_USER_ID}>`
                 );
 
+
                 console.log(
                     "🟢 TRACKER STARTED"
                 );
+
 
                 return;
             }
@@ -264,13 +287,16 @@ client.on(
 
                 waitingForResponse = false;
 
+
                 await message.reply(
                     "🔴 **Kole V4 stock listener stopped.**"
                 );
 
+
                 console.log(
                     "🔴 TRACKER STOPPED"
                 );
+
 
                 return;
             }
@@ -320,6 +346,7 @@ client.on(
                     `Alert: ${alertText}`
                 );
 
+
                 return;
             }
 
@@ -340,8 +367,10 @@ client.on(
                     ">."
                 );
 
+
                 return;
             }
+
 
         } catch (error) {
 
@@ -355,7 +384,7 @@ client.on(
 
 
 // ============================================================
-// HANDLE AUTOMATED !STOK
+// HANDLE !STOK
 // ============================================================
 
 async function handleStockCommand(
@@ -379,32 +408,38 @@ async function handleStockCommand(
     lastCheck = new Date();
 
 
+    console.log("");
+    console.log("--------------------------------------");
+
+    console.log(
+        `!stok detected at ${lastCheck.toLocaleString()}`
+    );
+
+    console.log(
+        "Waiting for Kole V4..."
+    );
+
+    console.log(
+        "--------------------------------------"
+    );
+
+
     try {
-
-        // ====================================================
-        // MAKE SURE TRACKING CHANNEL IS AVAILABLE
-        // ====================================================
-
-        if (!trackingChannel) {
-
-            trackingChannel =
-                await client.channels.fetch(
-                    TRACKING_CHANNEL_ID
-                );
-        }
-
 
         // ====================================================
         // WAIT FOR KOLE V4 RESPONSE
         // ====================================================
 
-        const filter = (response) => {
+        const filter = (
+            response
+        ) => {
 
-            // Must be in the same channel
+            // Same channel
             if (
                 response.channel.id !==
                 TRACKING_CHANNEL_ID
             ) {
+
                 return false;
             }
 
@@ -414,38 +449,44 @@ async function handleStockCommand(
                 response.author.id ===
                 client.user.id
             ) {
+
                 return false;
             }
 
 
             const text =
-                getMessageText(response);
+                getMessageText(
+                    response
+                );
 
 
-            // The response MUST contain
-            // "Mevcut Stok"
+            console.log(
+                "📩 Message received while waiting:"
+            );
+
+            console.log(
+                text
+            );
+
+
+            // Must contain "Mevcut Stok"
             if (
-                !/mevcut\s+stok/i.test(text)
+                !/mevcut\s+stok\s*:/i.test(
+                    text
+                )
             ) {
+
                 return false;
             }
 
 
             console.log(
-                "🔎 Possible stock response detected."
+                "✅ Stock response detected!"
             );
 
-            console.log(
-                `Author ID: ${response.author.id}`
-            );
 
             return true;
         };
-
-
-        console.log(
-            "⏳ Waiting up to 15 seconds for Kole V4..."
-        );
 
 
         const collected =
@@ -461,10 +502,12 @@ async function handleStockCommand(
             collected.first();
 
 
-        if (!response) {
+        if (
+            !response
+        ) {
 
             console.log(
-                "❌ No stock response received."
+                "❌ Kole V4 did not respond."
             );
 
             return;
@@ -472,16 +515,18 @@ async function handleStockCommand(
 
 
         // ====================================================
-        // READ RESPONSE
+        // READ KOLE RESPONSE
         // ====================================================
 
         const responseText =
-            getMessageText(response);
+            getMessageText(
+                response
+            );
 
 
         console.log("");
         console.log(
-            "🤖 KOLE RESPONSE:"
+            "🤖 KOLE V4 RESPONSE:"
         );
 
         console.log(
@@ -494,7 +539,9 @@ async function handleStockCommand(
         // ====================================================
 
         const stock =
-            parseStock(responseText);
+            parseStock(
+                responseText
+            );
 
 
         if (
@@ -502,7 +549,7 @@ async function handleStockCommand(
         ) {
 
             console.log(
-                "❌ Could not parse stock amount."
+                "❌ Could not read stock amount."
             );
 
             return;
@@ -513,7 +560,7 @@ async function handleStockCommand(
 
 
         console.log(
-            `💰 STOCK = ${formatStock(stock)}M`
+            `💰 STOCK: ${formatStock(stock)}M`
         );
 
 
@@ -571,22 +618,19 @@ async function handleStockCommand(
         );
 
 
-        // IMPORTANT:
-        // This ALWAYS sends a response.
-        //
-        // It DOES NOT ping anyone.
-
+        // Send message WITHOUT pinging anyone
         await sendNoStockMessage(
             stock
         );
 
 
-        // Reset alert state.
+        // Reset alert.
         //
         // This means when stock becomes > 0 again,
         // the next available-stock check will ping you.
 
         stockAlerted = false;
+
 
     } catch (error) {
 
@@ -614,7 +658,7 @@ async function handleStockCommand(
 
 
 // ============================================================
-// GET MESSAGE TEXT
+// GET TEXT FROM MESSAGE
 // ============================================================
 
 function getMessageText(
@@ -717,27 +761,41 @@ function parseStock(
 ) {
 
     /*
-        Examples:
+        Handles ALL of these:
 
         Mevcut Stok: 0.0M OwO
 
-        Mevcut Stok: 500.0M OwO
+        **Mevcut Stok:** `0.0M` OwO
 
-        Mevcut Stok: 1,461.0M OwO
+        **Mevcut Stok:** `500.0M` OwO
 
-        Mevcut Stok: 2M OwO
+        Mevcut Stok: `1,500.5M` OwO
+
+        **Mevcut Stok:** 1,500.5M OwO
     */
 
 
     const match =
         text.match(
-            /Mevcut\s+Stok\s*:\s*([\d.,]+)\s*M/i
+            /Mevcut\s+Stok\s*:\s*`?\s*([\d.,]+)\s*M/i
         );
 
 
     if (
         !match
     ) {
+
+        console.log(
+            "❌ Could not find stock value."
+        );
+
+        console.log(
+            "Text was:"
+        );
+
+        console.log(
+            text
+        );
 
         return null;
     }
@@ -760,6 +818,10 @@ function parseStock(
     if (
         !Number.isFinite(stock)
     ) {
+
+        console.log(
+            "❌ Stock value is not a valid number."
+        );
 
         return null;
     }
@@ -824,7 +886,7 @@ async function sendStockAlert(
 
         content,
 
-        // ONLY ALERT_USER_ID can be pinged
+        // ONLY alert user can be pinged
         allowedMentions: {
             users: [
                 ALERT_USER_ID
@@ -872,9 +934,9 @@ async function sendNoStockMessage(
         content,
 
         // ====================================================
-        // VERY IMPORTANT
+        // IMPORTANT:
         //
-        // Nobody gets pinged here.
+        // NO ONE IS PINGED WHEN STOCK IS 0
         // ====================================================
 
         allowedMentions: {
